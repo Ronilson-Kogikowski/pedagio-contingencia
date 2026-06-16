@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Contingência – Nova Rota do Oeste</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --road-color: #1e293b;
+            --accent-color: #3b82f6;
+            --success: #10b981;
+            --danger: #ef4444;
+            --glass-bg: rgba(26, 47, 74, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body { 
+            margin: 0; padding: 0; 
+            background: var(--bg-color); 
+            color: #f8fafc; 
+            font-family: 'Inter', sans-serif; 
+            height: 100vh; 
+            overflow: hidden; 
+            position: relative;
+        }
+
+        .panel {
+            position: absolute;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .top-left { top: 50%; left: 20px; width: 340px; height: 55vh; transform: translateY(-50%); display: flex; flex-direction: column; justify-content: center; }
+        .top-right { top: 50%; right: 20px; width: 340px; height: 55vh; transform: translateY(-50%); display: flex; flex-direction: column; overflow-y: auto; }
+        .logo-bar {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 10px;
+            padding: 6px 14px;
+            z-index: 20;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .logo-bar img { height: 44px; display: block; }
+        .credit {
+            position: fixed;
+            bottom: 68px;
+            right: 16px;
+            z-index: 20;
+            color: rgba(148,163,184,0.5);
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+        .shortcut-hint {
+            position: fixed;
+            bottom: 68px;
+            left: 16px;
+            z-index: 20;
+            color: rgba(148,163,184,0.35);
+            font-size: 0.65rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        h1 { font-size: 1.25rem; margin: 0 0 15px 0; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+        h2 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin: 0 0 10px 0; font-weight: 600; }
+
+        .metric-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .metric-value { font-size: 2rem; font-weight: 700; color: #fff; margin-bottom: 5px; font-variant-numeric: tabular-nums; }
+        .metric-label { font-size: 0.8rem; color: #94a3b8; }
+
+        .control-group { margin-bottom: 15px; }
+        .control-group label { display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 8px; color: #cbd5e1; }
+        
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-1px); }
+        .btn.active-primary { background: var(--accent-color); border-color: var(--accent-color); box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+        .btn.active-danger { background: var(--danger); border-color: var(--danger); box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); }
+
+        .lane-toggle {
+            width: 100%; padding: 10px; margin-bottom: 8px;
+            border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05); color: #94a3b8;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .lane-toggle:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .lane-toggle.closed {
+            background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+        .lane-toggle.closed::before { content: '🚧 '; }
+        .lane-toggle:not(.closed)::before { content: '✅ '; }
+
+        canvas { display: block; background: #1e293b; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        .page-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,14,26,.97);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:stretch;height:60px}
+        .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#5b6f8a;font-size:.66rem;font-weight:600;gap:3px;transition:all .2s;border-right:1px solid rgba(255,255,255,.04);padding:0 5px;text-align:center;line-height:1.3}
+        .nav-item:last-child{border-right:none}
+        .nav-item:hover{color:#94a3b8;background:rgba(255,255,255,.03)}
+        .nav-item.active{color:#3b82f6;border-top:2px solid #3b82f6}
+        .nav-icon{font-size:1.1rem}
+
+
+
+        /* Confirmation Modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid rgba(239,68,68,0.3); border-radius: 20px;
+            padding: 36px 44px; max-width: 400px; text-align: center;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+            animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes modalIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .modal-box h2 { font-size: 1.2rem; font-weight: 700; color: #fca5a5; margin: 12px 0 8px; text-transform: none; letter-spacing: normal; }
+        .modal-box p { color: #94a3b8; font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; }
+        .modal-actions { display: flex; gap: 12px; justify-content: center; }
+        .modal-btn {
+            padding: 10px 28px; border-radius: 8px; font-size: 0.9rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s;
+            border: none;
+        }
+        .modal-btn.confirm { background: var(--danger); color: #fff; }
+        .modal-btn.confirm:hover { background: #dc2626; transform: translateY(-1px); }
+        .modal-btn.cancel { background: rgba(255,255,255,0.08); color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
+        .modal-btn.cancel:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+        /* Page fade-in */
+        body { animation: pageIn 0.4s ease; }
+        @keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Scrollbar do painel direito */
+        .top-right::-webkit-scrollbar { width: 4px; }
+        .top-right::-webkit-scrollbar-track { background: transparent; }
+        .top-right::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 100px; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .top-left { width: 290px; left: 12px; }
+            .top-right { width: 290px; right: 12px; }
+        }
+        @media (max-width: 1050px) {
+            .top-left { width: 240px; left: 10px; padding: 14px; }
+            .top-right { width: 240px; right: 10px; padding: 14px; }
+            .top-left h1 { font-size: 1.05rem; }
+            .top-right h2 { font-size: 0.75rem; }
+            .top-left .metric-value { font-size: 1.2rem !important; padding: 12px 8px !important; }
+        }
+        @media (max-width: 920px) {
+            .top-left { width: 200px; left: 8px; padding: 10px; }
+            .top-right { width: 200px; right: 8px; padding: 10px; }
+            .top-left h1 { font-size: 0.9rem; margin-bottom: 8px; }
+            .top-left .metric-value { font-size: 1rem !important; padding: 8px 6px !important; }
+            .top-right h2 { font-size: 0.7rem; margin-bottom: 6px; }
+            .top-left .metric-label { font-size: 0.65rem; }
+            .top-left p { font-size: 0.6rem !important; }
+            .top-right .btn { font-size: 0.75rem; padding: 8px; }
+            .top-right .control-group label { font-size: 0.7rem; }
+        }
+        @media (max-width: 800px) {
+            .top-left, .top-right { display: none; }
+            .shortcut-hint { display: none; }
+
+            .logo-bar { top: 8px; right: 8px; padding: 4px 10px; }
+            .logo-bar img { height: 32px; }
+            .credit { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="panel top-left">
+        <h1>Simulação de Plano de Contingência</h1>
+        <div class="metric-card" style="margin-bottom:15px;">
+                <div class="metric-value" id="dicaSeguranca" style="font-size:1.5rem;line-height:1.8;flex:1;display:flex;align-items:center;justify-content:center;color:#e2e8f0;font-weight:700;padding:20px 12px;">Segurança é um valor inegociável — proteja a sua vida e de quem está a sua volta</div>
+            <div class="metric-label">Dica de Segurança</div>
+        </div>
+        <p style="font-size: 0.8rem; color: #64748b; line-height: 1.4; margin: 0;">
+            Pressione <kbd style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px;font-size:0.75rem;">C</kbd> para contingência ·
+            <kbd style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px;font-size:0.75rem;">R</kbd> normal ·
+            <kbd style="background:rgba(255,255,255,0.08);padding:1px 6px;border-radius:4px;font-size:0.75rem;">1-4</kbd> faixas
+        </p>
+    </div>
+
+    <div class="logo-bar">
+        <img src="logo.png" alt="Nova Rota do Oeste">
+    </div>
+
+    <div class="credit">Desenvolvido por Ronilson K. Brizola</div>
+    <div class="shortcut-hint">C: Contingência &nbsp;·&nbsp; R: Normal &nbsp;·&nbsp; 1-4: Faixas</div>
+
+    <div class="panel top-right">
+        <h2>Controles da Simulação</h2>
+        
+        <div class="control-group">
+            <label><span>Volume de Tráfego</span> <span id="volLabel">Médio</span></label>
+            <input type="range" id="trafficVolume" min="0.5" max="5" step="0.5" value="2.5">
+        </div>
+
+        <h2 style="margin-top: 25px;">Cenários Prontos</h2>
+        <button id="btnNormal" class="btn active-primary">
+            <span style="display:block; width:8px; height:8px; background:#fff; border-radius:50%;"></span>
+            Operação Normal (Todas Liberadas)
+        </button>
+        <button id="btnContingency" class="btn">
+            <span style="display:block; width:8px; height:8px; background:#fff; border-radius:50%;"></span>
+            🚨 Início do Plano
+        </button>
+
+        <h2 style="margin-top: 25px;">Controle Manual de Cancelas</h2>
+        <div class="lane-toggles" id="laneToggles"></div>
+        <details style="margin-top:12px;font-size:.75rem;color:#64748b;cursor:pointer">
+            <summary style="font-weight:600;font-size:.72rem;color:#94a3b8">Legenda das faixas</summary>
+            <div style="margin-top:8px;display:flex;flex-direction:column;gap:5px">
+                <span><strong style="color:#e2e8f0">AVI</strong> — Automatic Vehicle Identification (pista automática)</span>
+                <span><strong style="color:#e2e8f0">Mista</strong> — Atende tanto automático quanto manual</span>
+                <span><strong style="color:#e2e8f0">L3</strong> — Cabine de cobrança manual</span>
+                <span><strong style="color:#e2e8f0">L4</strong> — Cabine de cobrança manual (faixa livre em contingência)</span>
+            </div>
+        </details>
+    </div>
+    
+    <canvas id="appCanvas" width="800" height="600"></canvas>
+
+    <!-- Welcome Modal -->
+    <div class="modal-overlay" id="welcomeModal">
+        <div class="modal-box" style="border-color:rgba(59,130,246,.3);max-width:440px">
+            <span style="font-size: 2.5rem">🛠️</span>
+            <h2 style="color:#60a5fa;text-transform:none;letter-spacing:normal">Treinamento de Contingência</h2>
+            <p style="text-align:left;font-size:.88rem;line-height:1.7">Este simulador reproduz um cenário de <strong>falta de energia elétrica</strong> no pedágio.<br><br>
+            Siga o passo a passo do <strong>Guia do Operador</strong> para praticar a arrecadação manual, a liquidação do turno e a prestação de contas no retorno da energia.<br><br>
+            Use os controles ao lado para ajustar o tráfego, abrir/fechar faixas e ativar o plano de contingência.</p>
+            <div class="modal-actions">
+                <button class="modal-btn confirm" id="welcomeOk" style="background:var(--accent-color);border-color:var(--accent-color);box-shadow:0 0 15px rgba(59,130,246,.4)">Começar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <span style="font-size: 2.5rem">🚨</span>
+            <h2>Ativar Plano de Contingência?</h2>
+            <p>As faixas 1, 2 e 3 serão fechadas.<br>Apenas a faixa 4 (Livre) permanecerá aberta durante o plano.</p>
+            <div class="modal-actions">
+                <button class="modal-btn confirm" id="modalConfirm">Sim, Ativar</button>
+                <button class="modal-btn cancel" id="modalCancel">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="page-nav">
+      <a href="index.html" class="nav-item active"><span class="nav-icon">🖥️</span>Simulador</a>
+      <a href="operador.html" class="nav-item"><span class="nav-icon">📋</span>Guia Operador</a>
+      <a href="liquidacao.html" class="nav-item"><span class="nav-icon">💰</span>Liquidação</a>
+      <a href="prestacao_contas.html" class="nav-item"><span class="nav-icon">📊</span>Prestação</a>
+    </nav>
+
+    <script>
+        const canvas = document.getElementById('appCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const lanes = 4;
+        const baseLaneWidth = 100;
+        const safeDistance = 100;
+        let laneWidth, roadWidth, tollY, roadStartX, maxSpeed;
+
+        function recalcDimensions() {
+            laneWidth = Math.min(baseLaneWidth, (canvas.width - 100) / lanes);
+            roadWidth = lanes * laneWidth;
+            tollY = canvas.height * 0.6;
+            maxSpeed = (tollY + 60) / 900;
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            recalcDimensions();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let isContingency = false;
+        let trafficMultiplier = 2.5;
+        let lanesData = Array(lanes).fill(true).map(() => ({ open: true, angle: 0 }));
+
+        let cars = [];
+        let frames = 0;
+
+
+        const safetyTips = [
+            'Segurança é um valor inegociável — proteja a sua vida e de quem está a sua volta',
+            'Mantenha a calma — agir com tranquilidade evita erros e acidentes durante a contingência',
+            'Sempre sinalize de frente para o fluxo — garanta que os motoristas vejam seus comandos',
+            'Na cobrança manual, redobre a atenção: confira o valor, o troco e o recibo',
+            'Nunca atravesse a pista sem olhar — use sempre a faixa de pedestres',
+            'Ao fechar a marquise, verifique se não há veículos se aproximando',
+            'Use os equipamentos de proteção individual em todos os momentos',
+            'Comunique qualquer anomalia imediatamente à liderança',
+            'Sinalize com antecedência — mudanças bruscas confundem os usuários da via',
+            'Lembre-se: tem alguém esperando você em casa — trabalhe com segurança',
+        ];
+        let safetyIdx = 0;
+
+        // Confirmation Modal
+        let pendingContingency = false;
+        const modalOverlay = document.getElementById('confirmModal');
+        document.getElementById('modalConfirm').onclick = () => {
+            modalOverlay.classList.remove('show');
+            if (pendingContingency) {
+                doActivateContingency();
+                pendingContingency = false;
+            }
+        };
+        document.getElementById('modalCancel').onclick = () => {
+            modalOverlay.classList.remove('show');
+            pendingContingency = false;
+        };
+
+        // Welcome modal (first visit only)
+        if(!localStorage.getItem('opencode_welcome')){
+            document.getElementById('welcomeModal').classList.add('show');
+            localStorage.setItem('opencode_welcome','1');
+        }
+        document.getElementById('welcomeOk').onclick = () => {
+            document.getElementById('welcomeModal').classList.remove('show');
+        };
+
+        // UI Element bindings
+        const btnNormal = document.getElementById('btnNormal');
+        const btnContingency = document.getElementById('btnContingency');
+        const sliderVolume = document.getElementById('trafficVolume');
+        const volLabel = document.getElementById('volLabel');
+        const laneTogglesDiv = document.getElementById('laneToggles');
+
+        for(let i=0; i<lanes; i++) {
+            let btn = document.createElement('button');
+            btn.className = 'lane-toggle';
+            btn.innerText = `L${i+1}`;
+            btn.onclick = () => toggleLane(i);
+            laneTogglesDiv.appendChild(btn);
+        }
+
+        function updateLaneUI() {
+            const btns = laneTogglesDiv.querySelectorAll('.lane-toggle');
+            lanesData.forEach((l, i) => {
+                if(l.open) btns[i].classList.remove('closed');
+                else btns[i].classList.add('closed');
+            });
+        }
+
+        function toggleLane(index) {
+            lanesData[index].open = !lanesData[index].open;
+            btnNormal.classList.remove('active-primary');
+            btnContingency.classList.remove('active-danger');
+            updateLaneUI();
+            recalculateTargets();
+
+        }
+
+        btnNormal.onclick = () => {
+            isContingency = false;
+            lanesData.forEach(l => l.open = true);
+            btnNormal.classList.add('active-primary');
+            btnContingency.classList.remove('active-danger');
+            updateLaneUI();
+
+        };
+
+        function doActivateContingency() {
+            isContingency = true;
+            lanesData[0].open = false;
+            lanesData[1].open = false;
+            lanesData[2].open = false;
+            lanesData[3].open = true;
+            btnContingency.classList.add('active-danger');
+            btnNormal.classList.remove('active-primary');
+            updateLaneUI();
+            recalculateTargets();
+
+        }
+
+        btnContingency.onclick = () => {
+            pendingContingency = true;
+            modalOverlay.classList.add('show');
+        };
+
+        sliderVolume.oninput = (e) => {
+            trafficMultiplier = parseFloat(e.target.value);
+            if(trafficMultiplier < 2) volLabel.innerText = "Leve";
+            else if(trafficMultiplier < 4) volLabel.innerText = "Médio";
+            else volLabel.innerText = "Severo";
+
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'c' || e.key === 'C') {
+                btnContingency.click();
+            } else if (e.key === 'r' || e.key === 'R') {
+                btnNormal.click();
+            } else if (e.key >= '1' && e.key <= '4') {
+                let idx = parseInt(e.key) - 1;
+                toggleLane(idx);
+            }
+        });
+
+        function getOpenLanes() {
+            let open = [];
+            lanesData.forEach((l, i) => { if(l.open) open.push(i); });
+            return open;
+        }
+
+        function recalculateTargets() {
+            let openLanes = getOpenLanes();
+            if(openLanes.length === 0) return;
+            cars.forEach(car => {
+                if (!lanesData[car.targetLane].open && car.y < tollY - 120) {
+                    let bestLane = openLanes[0];
+                    let minDiff = Math.abs(bestLane - car.lane);
+                    for(let i=1; i<openLanes.length; i++) {
+                        let diff = Math.abs(openLanes[i] - car.lane);
+                        if(diff < minDiff) { minDiff = diff; bestLane = openLanes[i]; }
+                    }
+                    car.targetLane = bestLane;
+                }
+            });
+        }
+
+        const VEHICLE_TYPES = [
+            { n: 'carro', w: [22,28], l: [40,55], sf: [0.85,1.15], cl: ['#e2e8f0','#ffffff','#1e293b','#dc2626','#2563eb','#fbbf24'] },
+            { n: 'caminhao', w: [30,36], l: [70,90], sf: [0.5,0.7], cl: ['#94a3b8','#64748b','#475569','#dc2626','#ea580c'] },
+            { n: 'onibus', w: [32,38], l: [85,105], sf: [0.45,0.6], cl: ['#fbbf24','#f59e0b','#fff','#3b82f6','#10b981'] },
+            { n: 'moto', w: [14,18], l: [25,32], sf: [1.1,1.3], cl: ['#dc2626','#2563eb','#fff','#000','#f97316'] },
+        ];
+
+        class Car {
+            constructor() {
+                let openLanes = getOpenLanes();
+                if(openLanes.length === 0) openLanes = [0];
+                this.lane = Math.floor(Math.random() * lanes);
+                this.targetLane = lanesData[this.lane].open ? this.lane : openLanes[Math.floor(Math.random()*openLanes.length)];
+                this.x = roadStartX + this.lane * laneWidth + laneWidth/2;
+                this.y = -60;
+
+                this.type = VEHICLE_TYPES[Math.floor(Math.random() * VEHICLE_TYPES.length)];
+                while(this.type.n === 'onibus' && Math.random() > 0.15) { this.type = VEHICLE_TYPES[0]; }
+                while(this.type.n === 'moto' && Math.random() > 0.12) { this.type = VEHICLE_TYPES[0]; }
+                if(this.type.n === 'caminhao' && Math.random() > 0.25) { this.type = VEHICLE_TYPES[0]; }
+
+                this.speed = maxSpeed * (this.type.sf[0] + Math.random() * (this.type.sf[1] - this.type.sf[0]));
+                this.actualSpeed = this.speed;
+                this.braking = false;
+                this.served = false;
+                this.color = this.type.cl[Math.floor(Math.random() * this.type.cl.length)];
+                this.width = this.type.w[0] + Math.random() * (this.type.w[1] - this.type.w[0]);
+                this.length = this.type.l[0] + Math.random() * (this.type.l[1] - this.type.l[0]);
+
+                this.isMoto = this.type.n === 'moto';
+                this.isBig = this.type.n === 'caminhao' || this.type.n === 'onibus';
+            }
+
+            update() {
+                let targetX = roadStartX + this.targetLane * laneWidth + laneWidth/2;
+                if (Math.abs(this.x - targetX) > 1) {
+                    this.x += (targetX - this.x) * 0.05;
+                    this.lane = Math.floor((this.x - roadStartX) / laneWidth);
+                }
+
+                let thisFront = this.y + this.length / 2;
+                let thisLeft = this.x - this.width / 2;
+                let thisRight = this.x + this.width / 2;
+                let distToAhead = Infinity;
+                let carAhead = null;
+                for(let c of cars) {
+                    if(c === this) continue;
+                    let cLeft = c.x - c.width / 2;
+                    let cRight = c.x + c.width / 2;
+                    let cBack = c.y - c.length / 2;
+                    if (thisRight > cLeft && thisLeft < cRight) {
+                        let gap = cBack - thisFront;
+                        if (gap > 0 && gap < distToAhead) {
+                            distToAhead = gap;
+                            carAhead = c;
+                        }
+                    }
+                }
+
+                let desiredSpeed = this.speed;
+                let distToToll = tollY - this.y;
+                if (distToToll > 0 && distToToll < 150) {
+                    if(this.targetLane === 0) {
+                        desiredSpeed = 2.5;
+                    } else {
+                        desiredSpeed = lanesData[this.targetLane].open ? 1.0 : 0.5;
+                    }
+                }
+
+                if (distToAhead < safeDistance) {
+                    let brakeFactor = Math.pow(1 - (distToAhead / safeDistance), 2);
+                    desiredSpeed = Math.min(desiredSpeed, this.speed * (1 - brakeFactor));
+                }
+                if(carAhead && distToAhead < 60) {
+                    desiredSpeed = Math.min(desiredSpeed, carAhead.actualSpeed * 0.95);
+                }
+                if(carAhead && carAhead.actualSpeed < 0.2 && distToAhead < 80) {
+                    desiredSpeed = 0;
+                }
+
+                if(this.actualSpeed < desiredSpeed) {
+                    this.actualSpeed += 0.05;
+                    this.braking = false;
+                } else if(this.actualSpeed > desiredSpeed) {
+                    this.actualSpeed -= Math.min(0.35, this.actualSpeed - desiredSpeed + 0.05);
+                    this.braking = true;
+                }
+                if(this.actualSpeed < 0) this.actualSpeed = 0;
+                this.y += this.actualSpeed;
+
+                if (this.y > tollY - 10 && this.y < tollY + 40 && lanesData[this.targetLane].open) {
+                    lanesData[this.targetLane].angle = -80;
+                    if(!this.served) {
+                        this.served = true;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 10;
+                ctx.shadowOffsetY = 5;
+
+                if (this.isMoto) {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x - this.width/2, this.y - this.length/2, this.width, this.length);
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.fillStyle = '#0f172a';
+                    ctx.fillRect(this.x - this.width/2 + 1, this.y - this.length/2 + 2, this.width - 2, 6);
+                    return;
+                }
+
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.roundRect(this.x - this.width/2, this.y - this.length/2, this.width, this.length, this.isBig ? 4 : 6);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetY = 0;
+
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.roundRect(this.x - this.width/2 + 2, this.y - this.length/2 + this.length*0.2, this.width - 4, this.length*0.2, 2);
+                ctx.fill();
+
+                if (!this.isBig) {
+                    ctx.beginPath();
+                    ctx.roundRect(this.x - this.width/2 + 3, this.y - this.length/2 + this.length*0.7, this.width - 6, this.length*0.12, 2);
+                    ctx.fill();
+                }
+
+                if (this.braking || this.actualSpeed < 0.2) {
+                    ctx.fillStyle = '#ef4444';
+                    ctx.shadowColor = 'rgba(239, 68, 68, 0.9)';
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.roundRect(this.x - this.width/2 + 1, this.y - this.length/2, 6, 3, 2);
+                    ctx.roundRect(this.x + this.width/2 - 7, this.y - this.length/2, 6, 3, 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        function drawWorld() {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            roadStartX = (canvas.width - roadWidth) / 2;
+
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(roadStartX - 50, 0, roadWidth + 100, canvas.height);
+
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([20, 30]);
+
+            for(let i=0; i<=lanes; i++) {
+                if(i==0 || i==lanes) {
+                    ctx.setLineDash([]);
+                    ctx.strokeStyle = '#475569';
+                } else {
+                    ctx.setLineDash([20, 30]);
+                    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                }
+                ctx.beginPath();
+                ctx.moveTo(roadStartX + i*laneWidth, 0);
+                if(i>0 && i<lanes) ctx.lineTo(roadStartX + i*laneWidth, tollY - 120);
+                else ctx.lineTo(roadStartX + i*laneWidth, canvas.height);
+                ctx.stroke();
+
+                if(i>0 && i<lanes) {
+                    ctx.beginPath();
+                    ctx.moveTo(roadStartX + i*laneWidth, tollY + 80);
+                    ctx.lineTo(roadStartX + i*laneWidth, canvas.height);
+                    ctx.stroke();
+                }
+            }
+            ctx.setLineDash([]);
+
+            // Guard-rail
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(roadStartX - 54, 0, 6, canvas.height);
+            ctx.fillRect(roadStartX + roadWidth + 48, 0, 6, canvas.height);
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(roadStartX - 54, 0, 2, canvas.height);
+            ctx.fillRect(roadStartX + roadWidth + 52, 0, 2, canvas.height);
+
+            // Postes de luz
+            for(let p=0; p<12; p++) {
+                let py = p * (canvas.height / 12);
+                let side = p % 2 === 0 ? -1 : 1;
+                let px = side === -1 ? roadStartX - 54 : roadStartX + roadWidth + 54;
+                ctx.fillStyle = '#475569';
+                ctx.fillRect(px - 2, py, 4, 80);
+                ctx.fillStyle = '#fbbf24';
+                ctx.shadowColor = 'rgba(251,191,36,0.3)';
+                ctx.shadowBlur = 20;
+                ctx.fillRect(px - 6, py, 12, 4);
+                ctx.shadowBlur = 0;
+            }
+
+            // Cones
+            let closedIdx = [];
+            for(let li=0; li<lanes; li++) if(!lanesData[li].open) closedIdx.push(li);
+            if(closedIdx.length > 0) {
+                let blocks = [];
+                let bStart = closedIdx[0];
+                for(let i=1; i<closedIdx.length; i++) {
+                    if(closedIdx[i] !== closedIdx[i-1] + 1) {
+                        blocks.push({ l: bStart, r: closedIdx[i-1] });
+                        bStart = closedIdx[i];
+                    }
+                }
+                blocks.push({ l: bStart, r: closedIdx[closedIdx.length - 1] });
+
+                let sy = tollY - 350, ey = tollY - 100;
+                let drawConeLine = (sx, ex, n) => {
+                    for(let c=0; c<n; c++) {
+                        let p = c / (n - 1);
+                        let cx = sx + (ex - sx) * p, cy = sy + (ey - sy) * p;
+                        ctx.fillStyle = '#f97316';
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy - 16);
+                        ctx.lineTo(cx + 7, cy);
+                        ctx.lineTo(cx - 7, cy);
+                        ctx.fill();
+                        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                        ctx.fillRect(cx - 7, cy, 14, 3);
+                    }
+                };
+
+                for(let b of blocks) {
+                    let lc = b.l, rc = b.r;
+                    let leftT = null, rightT = null;
+                    for(let oi = lc - 1; oi >= 0; oi--) { if(lanesData[oi].open) { leftT = oi; break; } }
+                    for(let oi = rc + 1; oi < lanes; oi++) { if(lanesData[oi].open) { rightT = oi; break; } }
+
+                    if(leftT !== null && rightT !== null && (rc - lc) >= 1) {
+                        drawConeLine(roadStartX + lc * laneWidth + laneWidth / 2, roadStartX + lc * laneWidth, 15);
+                        drawConeLine(roadStartX + rc * laneWidth + laneWidth / 2, roadStartX + (rc + 1) * laneWidth, 15);
+                    } else if(rightT !== null) {
+                        drawConeLine(roadStartX + lc * laneWidth, roadStartX + (rc + 1) * laneWidth, 30);
+                    } else if(leftT !== null) {
+                        drawConeLine(roadStartX + (rc + 1) * laneWidth, roadStartX + lc * laneWidth, 30);
+                    }
+                }
+            }
+        }
+
+        function drawTollBooths() {
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(roadStartX - 80 + 10, tollY - 50 + 20, roadWidth + 160, 100);
+
+            const grad = ctx.createLinearGradient(0, tollY - 50, 0, tollY + 50);
+            grad.addColorStop(0, '#334155');
+            grad.addColorStop(1, '#1e293b');
+            ctx.fillStyle = grad;
+            ctx.fillRect(roadStartX - 80, tollY - 50, roadWidth + 160, 100);
+
+            for(let i = 0; i < lanes; i++) {
+                let cX = roadStartX + i * laneWidth;
+                ctx.fillStyle = '#64748b';
+                ctx.beginPath();
+                ctx.roundRect(cX + laneWidth - 10, tollY - 60, 20, 120, 10);
+                ctx.fill();
+
+                let isOpen = lanesData[i].open;
+                ctx.fillStyle = isOpen ? '#10b981' : '#ef4444';
+                ctx.shadowColor = isOpen ? 'rgba(16, 185, 129, 0.8)' : 'rgba(239, 68, 68, 0.8)';
+                ctx.shadowBlur = 20;
+
+                ctx.beginPath();
+                ctx.arc(cX + laneWidth/2, tollY - 25, 12, 0, Math.PI*2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                if(isOpen) {
+                    ctx.beginPath();
+                    ctx.moveTo(cX + laneWidth/2 - 5, tollY - 25);
+                    ctx.lineTo(cX + laneWidth/2, tollY - 20);
+                    ctx.lineTo(cX + laneWidth/2 + 6, tollY - 30);
+                    ctx.stroke();
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(cX + laneWidth/2 - 5, tollY - 30);
+                    ctx.lineTo(cX + laneWidth/2 + 5, tollY - 20);
+                    ctx.moveTo(cX + laneWidth/2 + 5, tollY - 30);
+                    ctx.lineTo(cX + laneWidth/2 - 5, tollY - 20);
+                    ctx.stroke();
+                }
+
+                ctx.save();
+                ctx.translate(cX + laneWidth - 8, tollY);
+                if(lanesData[i].angle < 0) {
+                    lanesData[i].angle += 2;
+                } else {
+                    lanesData[i].angle = 0;
+                }
+                let rad = (lanesData[i].angle * Math.PI) / 180;
+                ctx.rotate(rad);
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(-laneWidth + 20, -3, laneWidth - 20, 6);
+                ctx.fillStyle = '#ef4444';
+                for(let s=0; s<(laneWidth-20)/10; s++) {
+                    if(s%2==0) ctx.fillRect(-laneWidth + 20 + s*10, -3, 10, 6);
+                }
+                ctx.restore();
+            }
+        }
+
+        function rotateTips() {
+            if(frames % 720 === 0) {
+                document.getElementById('dicaSeguranca').innerText = safetyTips[safetyIdx];
+                safetyIdx = (safetyIdx + 1) % safetyTips.length;
+            }
+        }
+
+        function drawLaneLabels() {
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            let labels = ['AVI', 'Mista', 'L3', 'L4'];
+            for(let i=0; i<lanes; i++) {
+                let cx = roadStartX + i * laneWidth + laneWidth / 2;
+                ctx.fillStyle = 'rgba(255,255,255,0.12)';
+                ctx.font = `bold ${Math.min(22, laneWidth * 0.22)}px Inter, sans-serif`;
+                ctx.fillText(labels[i], cx, tollY + 80);
+                ctx.fillStyle = 'rgba(255,255,255,0.06)';
+                ctx.font = `${Math.min(14, laneWidth * 0.14)}px Inter, sans-serif`;
+                ctx.fillText(`Faixa ${i+1}`, cx, tollY + 108);
+            }
+        }
+
+        function spawnCars() {
+            if (Math.random() < 0.003 * trafficMultiplier) {
+                let c = new Car();
+                let blocked = cars.some(other =>
+                    other !== c &&
+                    Math.abs(other.x - c.x) < (other.width + c.width) / 2 + 10 &&
+                    Math.abs(other.y - c.y) < (other.length + c.length) / 2 + 20
+                );
+                if (!blocked) cars.push(c);
+            }
+        }
+
+        function engine() {
+            try {
+                frames++;
+                ctx.clearRect(0,0, canvas.width, canvas.height);
+
+                drawWorld();
+                spawnCars();
+
+                cars.sort((a,b) => a.y - b.y);
+                for(let i = cars.length - 1; i >= 0; i--) {
+                    let car = cars[i];
+                    car.update();
+                    car.draw();
+                    if (car.y > canvas.height + 150) {
+                        cars.splice(i, 1);
+                    }
+                }
+
+                drawTollBooths();
+                drawLaneLabels();
+                rotateTips();
+            } catch(e) {
+                console.error('Erro no motor:', e);
+            }
+            requestAnimationFrame(engine);
+        }
+
+        engine();
+    </script>
+</body>
+</html>

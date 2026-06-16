@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia do Operador – Nova Rota do Oeste</title>
+<link rel="icon" type="image/png" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0f172a;--surf:#1a2f4a;--border:rgba(255,255,255,0.08);--blue:#3b82f6;--cyan:#06b6d4;--green:#10b981;--orange:#f59e0b;--muted:#64748b;--text:#e2e8f0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding-bottom:70px;animation:pageIn .4s ease}@keyframes pageIn{from{opacity:0}to{opacity:1}}
+@media(max-width:640px){header{padding:12px 16px;gap:10px}.hinfo h1{font-size:1rem}.hinfo p{font-size:.72rem}.logo-wrap img{height:34px}.pbar-wrap{padding:8px 16px;gap:10px}.pbar-wrap .ptxt{font-size:.7rem}main{padding:20px 14px 28px}.kit-card{padding:16px 14px}.kit-grid{grid-template-columns:1fr}.kit-hdr h2{font-size:.95rem}.card{padding:13px 14px;gap:11px}.pay-grid{grid-template-columns:repeat(2,1fr)}.sec-hdr{margin:24px 0 12px}}
+header{position:relative;z-index:10;background:rgba(17,34,64,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;gap:14px}
+.logo-wrap{background:rgba(255,255,255,.93);padding:6px 14px;border-radius:9px;margin-left:auto;order:3}
+.logo-wrap img{height:42px;display:block}
+.credit{position:fixed;bottom:68px;right:16px;z-index:20;color:rgba(148,163,184,.5);font-size:.7rem;font-weight:500;letter-spacing:.02em}
+.hinfo h1{font-size:1.2rem;font-weight:700;background:linear-gradient(90deg,#3b82f6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hinfo p{color:var(--muted);font-size:.82rem;margin-top:2px}
+.back-btn{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.05);border:1px solid var(--border);color:#94a3b8;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:.82rem;transition:all .2s;white-space:nowrap}
+.back-btn:hover{background:rgba(255,255,255,.1);color:#fff}
+.pbar-wrap{position:sticky;top:0;z-index:50;background:rgba(10,20,35,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:9px 28px;display:flex;align-items:center;gap:14px}
+.ptrack{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:100px;width:0%;transition:width .5s;box-shadow:0 0 10px rgba(6,182,212,.5)}
+.ptxt{font-size:.8rem;font-weight:600;color:var(--cyan);white-space:nowrap}
+main{max-width:880px;margin:0 auto;padding:32px 22px 36px}
+.alert{padding:13px 17px;border-radius:11px;font-size:.85rem;line-height:1.6;margin-bottom:22px;display:flex;align-items:flex-start;gap:11px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);color:#93c5fd}
+.kit-card{background:var(--surf);border:1px solid rgba(245,158,11,.3);border-radius:15px;padding:22px 26px;margin-bottom:28px;position:relative;overflow:hidden}
+.kit-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.kit-hdr{display:flex;align-items:center;gap:13px;margin-bottom:18px}
+.kit-ico{width:46px;height:46px;border-radius:13px;background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.25);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.kit-hdr h2{font-size:1.05rem;font-weight:700;color:#f1f5f9}
+.kit-hdr p{font-size:.8rem;color:var(--muted);margin-top:2px}
+.kit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:9px}
+.kit-item{display:flex;align-items:center;gap:11px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:9px;padding:11px 13px}
+.ki-badge{min-width:34px;height:34px;border-radius:7px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.ki-name{font-size:.85rem;font-weight:600;color:#e2e8f0}
+.ki-code{font-size:.72rem;color:var(--muted);margin-top:1px;font-family:monospace}
+.sec-hdr{display:flex;align-items:center;gap:13px;margin:34px 0 15px}
+.sec-ico{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
+.bg-blue{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.2)}
+.bg-orange{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.2)}
+.bg-green{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.2)}
+.sec-info h3{font-size:1.05rem;font-weight:700;color:#f1f5f9}
+.sec-info p{font-size:.8rem;color:var(--muted);margin-top:1px}
+.divider{flex:1;height:1px;background:var(--border)}
+.steps{display:flex;flex-direction:column;gap:9px}
+.card{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:16px 18px;display:flex;align-items:flex-start;gap:15px;cursor:pointer;transition:all .3s;user-select:none}
+.card:hover{border-color:rgba(59,130,246,.3);transform:translateX(4px);box-shadow:-4px 0 0 var(--blue),0 8px 25px rgba(0,0,0,.2)}
+.card.done{background:rgba(16,185,129,.06);border-color:rgba(16,185,129,.25)}
+.card.done:hover{border-color:rgba(16,185,129,.5);box-shadow:-4px 0 0 var(--green),0 8px 25px rgba(0,0,0,.2)}
+.snum{min-width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;font-weight:700;flex-shrink:0;background:rgba(59,130,246,.15);border:2px solid rgba(59,130,246,.3);color:var(--blue);transition:all .3s}
+.card.done .snum{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4);color:var(--green);font-size:1.15rem}
+.scontent{flex:1}
+.stitle{font-size:.97rem;font-weight:600;color:#f1f5f9;line-height:1.3;transition:color .3s}
+.card.done .stitle{color:#94a3b8;text-decoration:line-through;text-decoration-color:rgba(148,163,184,.4)}
+.sdetail{font-size:.82rem;color:var(--muted);margin-top:4px;line-height:1.55}
+.tags{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.tag{font-size:.69rem;font-weight:600;padding:3px 9px;border-radius:100px}
+.tb{background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+.to{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+.tg{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.2)}
+.scheck{width:20px;height:20px;border-radius:5px;border:2px solid rgba(255,255,255,.15);flex-shrink:0;margin-top:2px;transition:all .3s}
+.card.done .scheck{background:var(--green);border-color:var(--green);box-shadow:0 0 10px rgba(16,185,129,.4)}
+.pay-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:11px}
+.pay-item{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;padding:9px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.pay-item .pi{font-size:1.4rem}
+.pay-item .pn{font-size:.73rem;font-weight:600;color:#cbd5e1}
+.page-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,14,26,.97);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:stretch;height:60px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#5b6f8a;font-size:.66rem;font-weight:600;gap:3px;transition:all .2s;border-right:1px solid rgba(255,255,255,.04);padding:0 5px;text-align:center;line-height:1.3}
+.nav-item:last-child{border-right:none}
+.nav-item:hover{color:#94a3b8;background:rgba(255,255,255,.03)}
+.nav-item.active{color:var(--blue);border-top:2px solid var(--blue)}
+.nav-icon{font-size:1.1rem}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center}
+.modal.show{display:flex;animation:fi .4s ease}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.mcard{background:linear-gradient(135deg,#112240,#1a2f4a);border:1px solid rgba(16,185,129,.4);border-radius:20px;padding:42px 52px;text-align:center;max-width:440px;box-shadow:0 40px 80px rgba(0,0,0,.6);animation:pi .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pi{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.mcard h2{font-size:1.6rem;font-weight:800;color:var(--green);margin:16px 0 10px}
+.mcard p{color:#94a3b8;line-height:1.6;margin-bottom:24px;font-size:.92rem}
+.rbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:#fff;padding:10px 26px;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:600;transition:all .2s}
+.rbtn:hover{background:rgba(255,255,255,.15)}
+.rst-btn{display:inline-flex;align-items:center;gap:8px;margin-top:28px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5;padding:10px 18px;border-radius:9px;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s}
+.rst-btn:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.35)}
+</style>
+</head>
+<body>
+<header>
+  <div class="hinfo">
+    <h1>Protocolo do Operador de Cabine</h1>
+    <p>Plano de Contingência · Arrecadação Manual · Versão Vigente</p>
+  </div>
+  <div class="logo-wrap"><img src="logo.png" alt="Nova Rota do Oeste"></div>
+</header>
+
+<div class="pbar-wrap">
+  <span class="ptxt" id="pLabel">0 / 9 concluídas</span>
+  <div class="ptrack"><div class="pfill" id="pFill"></div></div>
+  <span class="ptxt" id="pPct">0%</span>
+</div>
+
+<main>
+  <div class="alert"><span>ℹ️</span><div><strong>Como usar:</strong> Clique em cada etapa para marcá-la como concluída. Acompanhe o progresso na barra acima.</div></div>
+
+  <div class="kit-card">
+    <div class="kit-hdr">
+      <div class="kit-ico">🎒</div>
+      <div><h2>Kit de Emergência</h2><p>Conteúdo obrigatório entregue ao operador no início do plano de contingência</p></div>
+    </div>
+    <div class="kit-grid">
+      <div class="kit-item"><div class="ki-badge">📄</div><div><div class="ki-name">02 Blocos de Recibos Manuais</div></div></div>
+      <div class="kit-item"><div class="ki-badge">📦</div><div><div class="ki-name">03 Envelopes Plásticos para Valores</div></div></div>
+      <div class="kit-item"><div class="ki-badge">📋</div><div><div class="ki-name">Controle de Recibos Manuais</div><div class="ki-code">FR-PDG-08 (digital)</div></div></div>
+      <div class="kit-item"><div class="ki-badge">🪙</div><div><div class="ki-name">Controle de Moedas Arrecadadas</div><div class="ki-code">FR-PDG-09</div></div></div>
+      <div class="kit-item"><div class="ki-badge">📊</div><div><div class="ki-name">Planilha de Auditoria</div><div class="ki-code">FR-PDG-10</div></div></div>
+      <div class="kit-item"><div class="ki-badge">🚗</div><div><div class="ki-name">Controle de Veículos – Contingência</div><div class="ki-code">FR-PDG-11</div></div></div>
+    </div>
+  </div>
+
+  <div class="sec-hdr">
+    <div class="sec-ico bg-blue">🏁</div>
+    <div class="sec-info"><h3>Fase 1 — Início do Turno</h3><p>Equipamentos e posicionamento antes de iniciar a operação</p></div>
+    <div class="divider"></div>
+  </div>
+  <div class="steps">
+    <div class="card" id="s1" onclick="tog('s1',1)">
+      <div class="snum" id="n1">1</div>
+      <div class="scontent">
+        <div class="stitle">Receber seu Kit Emergência</div>
+        <div class="sdetail">Verifique o conteúdo completo do kit conforme os 6 itens listados acima. Confirme que todos estão presentes antes de assinar.</div>
+        <div class="tags"><span class="tag tb">Obrigatório</span><span class="tag to">Kit Físico</span></div>
+      </div>
+      <div class="scheck" id="c1"></div>
+    </div>
+    <div class="card" id="s2" onclick="tog('s2',2)">
+      <div class="snum" id="n2">2</div>
+      <div class="scontent">
+        <div class="stitle">Assinar o Termo de Recebimento do Kit</div>
+        <div class="sdetail">Confirme por assinatura o recebimento formal de todo o material. Necessário para controle de responsabilidade e fechamento de turno.</div>
+        <div class="tags"><span class="tag tb">Obrigatório</span><span class="tag to">Documentação</span></div>
+      </div>
+      <div class="scheck" id="c2"></div>
+    </div>
+    <div class="card" id="s3" onclick="tog('s3',3)">
+      <div class="snum" id="n3">3</div>
+      <div class="scontent">
+        <div class="stitle">Dirigir-se à cabine escalada e iniciar a operação</div>
+        <div class="sdetail">Posicione-se na sua cabine designada. Confirme que o semáforo da faixa está operacional e que você está pronto para receber os veículos.</div>
+        <div class="tags"><span class="tag tg">Posicionamento</span></div>
+      </div>
+      <div class="scheck" id="c3"></div>
+    </div>
+  </div>
+
+  <div class="sec-hdr">
+    <div class="sec-ico bg-orange">🚗</div>
+    <div class="sec-info"><h3>Fase 2 — Atendimento do Veículo</h3><p>Procedimentos para cada veículo que se aproxima da cabine</p></div>
+    <div class="divider"></div>
+  </div>
+  <div class="steps">
+    <div class="card" id="s4" onclick="tog('s4',4)">
+      <div class="snum" id="n4">4</div>
+      <div class="scontent">
+        <div class="stitle">Aguardar o veículo chegar na cabine de arrecadação</div>
+        <div class="sdetail">Mantenha atenção na fila e sinalize ao veículo que pode avançar. Trate todos os usuários com cordialidade e profissionalismo.</div>
+        <div class="tags"><span class="tag tb">Atenção Contínua</span></div>
+      </div>
+      <div class="scheck" id="c4"></div>
+    </div>
+    <div class="card" id="s5" onclick="tog('s5',5)">
+      <div class="snum" id="n5">5</div>
+      <div class="scontent">
+        <div class="stitle">Identificar quantos eixos o veículo possui</div>
+        <div class="sdetail">Conte os eixos do veículo observando seu perfil lateral. O número de eixos é o principal critério para a classificação tarifária correta.</div>
+        <div class="tags"><span class="tag to">Eixos</span><span class="tag tb">Contagem Visual</span></div>
+      </div>
+      <div class="scheck" id="c5"></div>
+    </div>
+    <div class="card" id="s6" onclick="tog('s6',6)">
+      <div class="snum" id="n6">6</div>
+      <div class="scontent">
+        <div class="stitle">Classificar o veículo conforme a categoria correspondente</div>
+        <div class="sdetail">Aplique a tabela de categorias com base nos eixos. Em caso de dúvida, consulte o <strong style="color:#fbbf24">líder</strong> ou a tabela impressa no kit.</div>
+        <div class="tags"><span class="tag tb">Tabela de Categorias</span><span class="tag to">Consultar Líder se dúvida</span></div>
+      </div>
+      <div class="scheck" id="c6"></div>
+    </div>
+  </div>
+
+  <div class="sec-hdr">
+    <div class="sec-ico bg-green">🧾</div>
+    <div class="sec-info"><h3>Fase 3 — Cobrança e Registro</h3><p>Recebimento do pagamento e emissão do comprovante manual</p></div>
+    <div class="divider"></div>
+  </div>
+  <div class="steps">
+    <div class="card" id="s7" onclick="tog('s7',7)">
+      <div class="snum" id="n7">7</div>
+      <div class="scontent">
+        <div class="stitle">Aguardar o usuário apresentar o meio de pagamento</div>
+        <div class="sdetail">Informe o valor da categoria antes de receber. Formas de pagamento aceitas:</div>
+        <div class="pay-grid">
+          <div class="pay-item"><span class="pi">💵</span><span class="pn">Dinheiro</span></div>
+          <div class="pay-item"><span class="pi">📱</span><span class="pn">Pix</span></div>
+          <div class="pay-item"><span class="pi">💳</span><span class="pn">Crédito / Débito</span></div>
+          <div class="pay-item"><span class="pi">🔖</span><span class="pn">Tag</span></div>
+        </div>
+      </div>
+      <div class="scheck" id="c7"></div>
+    </div>
+    <div class="card" id="s8" onclick="tog('s8',8)">
+      <div class="snum" id="n8">8</div>
+      <div class="scontent">
+        <div class="stitle">Receber a tarifa conforme o valor da categoria</div>
+        <div class="sdetail">Confirme o valor recebido. Se necessário, efetue o troco com cuidado e confirme o valor devolvido ao usuário antes de liberá-lo.</div>
+        <div class="tags"><span class="tag tg">Cobrança</span><span class="tag to">Verificar Troco</span></div>
+      </div>
+      <div class="scheck" id="c8"></div>
+    </div>
+    <div class="card" id="s9" onclick="tog('s9',9)">
+      <div class="snum" id="n9">9</div>
+      <div class="scontent">
+        <div class="stitle">Preencher todos os campos do recibo e entregar ao usuário</div>
+        <div class="sdetail">Preencha todos os campos: data/hora, categoria, valor cobrado e canhoto de controle. Entregue recibo a <strong>todos os usuários sem exceção</strong>. Arquive o canhoto.</div>
+        <div class="tags"><span class="tag tb">Obrigatório</span><span class="tag tg">Comprovante</span><span class="tag to">Canhoto</span></div>
+      </div>
+      <div class="scheck" id="c9"></div>
+    </div>
+  </div>
+  <button class="rst-btn" onclick="reset()">🔄 Reiniciar Checklist</button>
+</main>
+
+<div class="credit">Desenvolvido por Ronilson K. Brizola</div>
+
+<nav class="page-nav">
+  <a href="index.html" class="nav-item"><span class="nav-icon">🖥️</span>Simulador</a>
+  <a href="operador.html" class="nav-item active"><span class="nav-icon">📋</span>Guia Operador</a>
+  <a href="liquidacao.html" class="nav-item"><span class="nav-icon">💰</span>Liquidação</a>
+  <a href="prestacao_contas.html" class="nav-item"><span class="nav-icon">📊</span>Prestação</a>
+</nav>
+
+<div class="modal" id="modal">
+  <div class="mcard">
+    <span style="font-size:3.2rem">✅</span>
+    <h2>Protocolo Concluído!</h2>
+    <p>Todas as etapas foram verificadas. Boa operação!</p>
+    <p style="color:var(--blue);margin-top:10px;font-weight:600">Avançando automaticamente para a próxima etapa...</p>
+  </div>
+</div>
+
+<script>
+const T=9;let done=new Set();const KEY='opencode_operador';
+function save(){localStorage.setItem(KEY,JSON.stringify([...done]));}
+function load(){localStorage.removeItem(KEY);}
+function tog(id,n){const c=document.getElementById(id);if(done.has(id)){done.delete(id);c.classList.remove('done');document.getElementById('n'+n).innerText=n;}else{done.add(id);c.classList.add('done');document.getElementById('n'+n).innerText='✓';burst(c);}save();upd(true);}
+function upd(click){const p=Math.round(done.size/T*100);document.getElementById('pFill').style.width=p+'%';document.getElementById('pLabel').innerText=done.size+' / '+T+' concluídas';document.getElementById('pPct').innerText=p+'%';if(done.size===T&&click){setTimeout(()=>document.getElementById('modal').classList.add('show'),400);setTimeout(()=>window.location.href='liquidacao.html',2000);}}
+function reset(){done.clear();document.querySelectorAll('.card').forEach(c=>c.classList.remove('done'));for(let i=1;i<=T;i++)document.getElementById('n'+i).innerText=i;document.getElementById('modal').classList.remove('show');localStorage.removeItem(KEY);upd();}
+function burst(card){const r=card.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;for(let i=0;i<8;i++){const d=document.createElement('div');d.style.cssText=`position:fixed;left:${cx}px;top:${cy}px;width:8px;height:8px;border-radius:50%;background:${['#10b981','#3b82f6','#06b6d4','#f59e0b'][i%4]};pointer-events:none;z-index:9999;transform:translate(-50%,-50%)`;document.body.appendChild(d);const a=i/8*Math.PI*2,dist=55+Math.random()*35;d.animate([{transform:`translate(-50%,-50%) scale(1)`,opacity:1},{transform:`translate(calc(-50% + ${Math.cos(a)*dist}px),calc(-50% + ${Math.sin(a)*dist}px)) scale(0)`,opacity:0}],{duration:480,easing:'ease-out'}).onfinish=()=>d.remove();}}
+load();upd();
+document.querySelectorAll('.page-nav a:not(.active)').forEach(function(el){
+    el.addEventListener('click',function(e){
+        if(done.size!==T){e.preventDefault();alert('Complete todas as etapas antes de sair desta página.');}
+    });
+});
+</script>
+</body></html>
