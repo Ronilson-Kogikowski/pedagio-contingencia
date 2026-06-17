@@ -441,11 +441,8 @@
             pendingContingency = false;
         };
 
-        // Welcome modal (first visit only)
-        if(!localStorage.getItem('opencode_welcome')){
-            document.getElementById('welcomeModal').classList.add('show');
-            localStorage.setItem('opencode_welcome','1');
-        }
+        // Welcome modal (sempre ao carregar a página)
+        document.getElementById('welcomeModal').classList.add('show');
         document.getElementById('welcomeOk').onclick = () => {
             document.getElementById('welcomeModal').classList.remove('show');
         };
