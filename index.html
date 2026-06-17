@@ -8,12 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0f172a;
-            --road-color: #1e293b;
+            --bg-color: #1e293b;
+            --road-color: #334155;
             --accent-color: #3b82f6;
             --success: #10b981;
             --danger: #ef4444;
-            --glass-bg: rgba(26, 47, 74, 0.75);
+            --glass-bg: rgba(51, 65, 85, 0.8);
             --glass-border: rgba(255, 255, 255, 0.1);
         }
 
@@ -51,7 +51,7 @@
             z-index: 20;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        .logo-bar img { height: 44px; display: block; }
+        .logo-bar img { height: 52px; display: block; }
         .credit {
             position: fixed;
             bottom: 68px;
@@ -136,7 +136,7 @@
         .lane-toggle.closed::before { content: '🚧 '; }
         .lane-toggle:not(.closed)::before { content: '✅ '; }
 
-        canvas { display: block; background: #1e293b; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+        canvas { display: block; background: #334155; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .page-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,14,26,.97);backdrop-filter:blur(12px);border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:stretch;height:60px}
         .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:#5b6f8a;font-size:.66rem;font-weight:600;gap:3px;transition:all .2s;border-right:1px solid rgba(255,255,255,.04);padding:0 5px;text-align:center;line-height:1.3}
         .nav-item:last-child{border-right:none}
@@ -154,7 +154,7 @@
         }
         .modal-overlay.show { display: flex; }
         .modal-box {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
+            background: linear-gradient(135deg, #334155, #1e293b);
             border: 1px solid rgba(239,68,68,0.3); border-radius: 20px;
             padding: 36px 44px; max-width: 400px; text-align: center;
             box-shadow: 0 40px 80px rgba(0,0,0,0.6);
@@ -209,11 +209,55 @@
         @media (max-width: 800px) {
             .top-left, .top-right { display: none; }
             .shortcut-hint { display: none; }
-
             .logo-bar { top: 8px; right: 8px; padding: 4px 10px; }
-            .logo-bar img { height: 32px; }
+            .logo-bar img { height: 38px; }
             .credit { display: none; }
+            .mobile-fab { display: flex !important; }
+            .mobile-drawer { display: flex !important; }
+            .mobile-overlay { display: block !important; }
         }
+
+        /* Mobile controls */
+        .mobile-fab {
+            display: none; position: fixed; bottom: 72px; right: 16px; z-index: 150;
+            width: 56px; height: 56px; border-radius: 50%; background: var(--accent-color);
+            border: none; color: #fff; font-size: 1.5rem; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(59,130,246,.5); align-items: center;
+            justify-content: center; transition: transform .2s;
+        }
+        .mobile-fab:active { transform: scale(.9); }
+        .mobile-overlay {
+            display: none; position: fixed; inset: 0; z-index: 145;
+            background: rgba(0,0,0,.5); opacity: 0; transition: opacity .3s; pointer-events: none;
+        }
+        .mobile-overlay.show { opacity: 1; pointer-events: auto; }
+        .mobile-drawer {
+            display: none; flex-direction: column; position: fixed; bottom: 0; left: 0;
+            right: 0; z-index: 155; background: rgba(10,20,35,.98);
+            backdrop-filter: blur(12px); border-top: 1px solid var(--glass-border);
+            border-radius: 20px 20px 0 0; max-height: 75vh; padding: 12px 20px max(24px,env(safe-area-inset-bottom));
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            transform: translateY(100%);
+            transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+        }
+        .mobile-drawer::-webkit-scrollbar { width: 4px; }
+        .mobile-drawer::-webkit-scrollbar-track { background: transparent; }
+        .mobile-drawer::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 100px; }
+        .mobile-drawer.open { transform: translateY(0); }
+        .drawer-handle {
+            width: 40px; height: 4px; border-radius: 4px;
+            background: rgba(255,255,255,.2); margin: 0 auto 14px; flex-shrink: 0;
+        }
+        .mobile-drawer h2 {
+            font-size: .85rem; text-transform: uppercase; letter-spacing: .05em;
+            color: #94a3b8; margin: 0 0 10px; font-weight: 600;
+        }
+        .mobile-drawer .btn { padding: 14px; font-size: 1rem; margin-bottom: 8px; }
+        .mobile-drawer .lane-toggle { padding: 14px; font-size: 1rem; margin-bottom: 6px; }
+        .mobile-drawer .control-group label { font-size: .95rem; }
+        .mobile-drawer .control-group { margin-bottom: 16px; }
+        .mobile-drawer details { margin-top: 12px; font-size: .8rem; color: #64748b; }
+        .mobile-drawer details summary { font-weight: 600; color: #94a3b8; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -298,6 +342,37 @@
         </div>
     </div>
 
+    <!-- Mobile Controls -->
+    <button class="mobile-fab" id="mobileFab" aria-label="Abrir controles">⚙️</button>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="drawer-handle"></div>
+        <h2>Controles</h2>
+        <div class="control-group">
+            <label><span>Volume de Tráfego</span> <span id="mobileVolLabel">Médio</span></label>
+            <input type="range" id="mobileTrafficVolume" min="0.5" max="5" step="0.5" value="2.5">
+        </div>
+        <button id="mobileBtnNormal" class="btn active-primary">
+            <span style="display:block;width:8px;height:8px;background:#fff;border-radius:50%;"></span>
+            Operação Normal
+        </button>
+        <button id="mobileBtnContingency" class="btn">
+            <span style="display:block;width:8px;height:8px;background:#fff;border-radius:50%;"></span>
+            🚨 Início do Plano
+        </button>
+        <h2 style="margin-top:20px;">Cancelas</h2>
+        <div class="lane-toggles" id="mobileLaneToggles"></div>
+        <details>
+            <summary>Legenda das faixas</summary>
+            <div style="margin:8px 0;display:flex;flex-direction:column;gap:5px">
+                <span><strong style="color:#e2e8f0">AVI</strong> — Pista automática</span>
+                <span><strong style="color:#e2e8f0">Mista</strong> — Automático e manual</span>
+                <span><strong style="color:#e2e8f0">L3</strong> — Cobrança manual</span>
+                <span><strong style="color:#e2e8f0">L4</strong> — Faixa livre (contingência)</span>
+            </div>
+        </details>
+    </div>
+
     <nav class="page-nav">
       <a href="index.html" class="nav-item active"><span class="nav-icon">🖥️</span>Simulador</a>
       <a href="operador.html" class="nav-item"><span class="nav-icon">📋</span>Guia Operador</a>
@@ -318,7 +393,7 @@
             laneWidth = Math.min(baseLaneWidth, (canvas.width - 100) / lanes);
             roadWidth = lanes * laneWidth;
             tollY = canvas.height * 0.6;
-            maxSpeed = (tollY + 60) / 900;
+            maxSpeed = (tollY + 60) / 450;
         }
 
         function resizeCanvas() {
@@ -392,9 +467,10 @@
 
         function updateLaneUI() {
             const btns = laneTogglesDiv.querySelectorAll('.lane-toggle');
+            const mBtns = document.getElementById('mobileLaneToggles')?.querySelectorAll('.lane-toggle');
             lanesData.forEach((l, i) => {
-                if(l.open) btns[i].classList.remove('closed');
-                else btns[i].classList.add('closed');
+                if(l.open) { btns[i].classList.remove('closed'); if(mBtns) mBtns[i].classList.remove('closed'); }
+                else { btns[i].classList.add('closed'); if(mBtns) mBtns[i].classList.add('closed'); }
             });
         }
 
@@ -434,12 +510,18 @@
             modalOverlay.classList.add('show');
         };
 
-        sliderVolume.oninput = (e) => {
-            trafficMultiplier = parseFloat(e.target.value);
-            if(trafficMultiplier < 2) volLabel.innerText = "Leve";
-            else if(trafficMultiplier < 4) volLabel.innerText = "Médio";
-            else volLabel.innerText = "Severo";
+        function updateTrafficLabel(val) {
+            trafficMultiplier = parseFloat(val);
+            var txt = trafficMultiplier < 2 ? "Leve" : trafficMultiplier < 4 ? "Médio" : "Severo";
+            volLabel.innerText = txt;
+            var mlbl = document.getElementById('mobileVolLabel');
+            if(mlbl) mlbl.innerText = txt;
+        }
 
+        sliderVolume.oninput = (e) => {
+            updateTrafficLabel(e.target.value);
+            var ms = document.getElementById('mobileTrafficVolume');
+            if(ms) ms.value = e.target.value;
         }
 
         // Keyboard shortcuts
@@ -539,9 +621,9 @@
                 let distToToll = tollY - this.y;
                 if (distToToll > 0 && distToToll < 150) {
                     if(this.targetLane === 0) {
-                        desiredSpeed = 2.5;
+                        desiredSpeed = this.speed;
                     } else {
-                        desiredSpeed = lanesData[this.targetLane].open ? 1.0 : 0.5;
+                        desiredSpeed = lanesData[this.targetLane].open ? this.speed * 0.4 : 0.1;
                     }
                 }
 
@@ -626,7 +708,7 @@
 
             roadStartX = (canvas.width - roadWidth) / 2;
 
-            ctx.fillStyle = '#1e293b';
+            ctx.fillStyle = '#334155';
             ctx.fillRect(roadStartX - 50, 0, roadWidth + 100, canvas.height);
 
             ctx.strokeStyle = '#64748b';
@@ -731,8 +813,8 @@
             ctx.fillRect(roadStartX - 80 + 10, tollY - 50 + 20, roadWidth + 160, 100);
 
             const grad = ctx.createLinearGradient(0, tollY - 50, 0, tollY + 50);
-            grad.addColorStop(0, '#334155');
-            grad.addColorStop(1, '#1e293b');
+            grad.addColorStop(0, '#475569');
+            grad.addColorStop(1, '#334155');
             ctx.fillStyle = grad;
             ctx.fillRect(roadStartX - 80, tollY - 50, roadWidth + 160, 100);
 
@@ -849,6 +931,52 @@
             }
             requestAnimationFrame(engine);
         }
+
+        // Mobile controls
+        (function() {
+            var fab = document.getElementById('mobileFab');
+            var overlay = document.getElementById('mobileOverlay');
+            var drawer = document.getElementById('mobileDrawer');
+
+            function openDrawer() { drawer.classList.add('open'); overlay.classList.add('show'); }
+            function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('show'); }
+
+            if(fab) {
+                fab.onclick = function() {
+                    if(drawer.classList.contains('open')) closeDrawer();
+                    else openDrawer();
+                };
+            }
+            if(overlay) overlay.onclick = closeDrawer;
+
+            // Mobile lane toggles
+            var mDiv = document.getElementById('mobileLaneToggles');
+            if(mDiv) {
+                for(var i=0; i<lanes; i++) {
+                    var btn = document.createElement('button');
+                    btn.className = 'lane-toggle';
+                    btn.innerText = 'L' + (i+1);
+                    btn.onclick = (function(idx) { return function() { toggleLane(idx); }; })(i);
+                    mDiv.appendChild(btn);
+                }
+                updateLaneUI();
+            }
+
+            // Mobile buttons
+            var mBtnNormal = document.getElementById('mobileBtnNormal');
+            var mBtnCont = document.getElementById('mobileBtnContingency');
+            if(mBtnNormal) mBtnNormal.onclick = function() { btnNormal.click(); closeDrawer(); };
+            if(mBtnCont) mBtnCont.onclick = function() { btnContingency.click(); closeDrawer(); };
+
+            // Mobile slider
+            var mSlider = document.getElementById('mobileTrafficVolume');
+            if(mSlider) {
+                mSlider.oninput = function(e) {
+                    updateTrafficLabel(e.target.value);
+                    sliderVolume.value = e.target.value;
+                };
+            }
+        })();
 
         engine();
     </script>
