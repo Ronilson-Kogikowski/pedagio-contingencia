@@ -94,7 +94,7 @@ main{max-width:880px;margin:0 auto;padding:32px 22px 36px}
 </header>
 
 <div class="pbar-wrap">
-  <span class="ptxt" id="pLabel">0 / 9 concluídas</span>
+  <span class="ptxt" id="pLabel">0 / 10 concluídas</span>
   <div class="ptrack"><div class="pfill" id="pFill"></div></div>
   <span class="ptxt" id="pPct">0%</span>
 </div>
@@ -145,7 +145,7 @@ main{max-width:880px;margin:0 auto;padding:32px 22px 36px}
       <div class="snum" id="n3">3</div>
       <div class="scontent">
         <div class="stitle">Dirigir-se à cabine escalada e iniciar a operação</div>
-        <div class="sdetail">Posicione-se na sua cabine designada. Confirme que o semáforo da faixa está operacional e que você está pronto para receber os veículos.</div>
+        <div class="sdetail">Posicione-se na sua cabine designada. Como estamos sem sistema elétrico, não há marquise disponível. Verifique se a sinalização está direcionando os veículos corretamente para a sua cabine e se você está pronto para recebê-los.</div>
         <div class="tags"><span class="tag tg">Posicionamento</span></div>
       </div>
       <div class="scheck" id="c3"></div>
@@ -185,6 +185,15 @@ main{max-width:880px;margin:0 auto;padding:32px 22px 36px}
       </div>
       <div class="scheck" id="c6"></div>
     </div>
+    <div class="card" id="s7" onclick="tog('s7',7)">
+      <div class="snum" id="n7">7</div>
+      <div class="scontent">
+        <div class="stitle">Auditor verifica a categoria dos veículos fora da cabine</div>
+        <div class="sdetail">O auditor posiciona-se do lado de fora da cabine e confere a categoria de cada veículo utilizando a <strong style="color:#fbbf24">Planilha de Auditoria FR-PDG-10</strong>. Essa verificação garante que a classificação tarifária aplicada pelo operador está correta e serve como controle para a prestação de contas.</div>
+        <div class="tags"><span class="tag tb">FR-PDG-10</span><span class="tag to">Auditoria</span><span class="tag tg">Conferência</span></div>
+      </div>
+      <div class="scheck" id="c7"></div>
+    </div>
   </div>
 
   <div class="sec-hdr">
@@ -193,8 +202,8 @@ main{max-width:880px;margin:0 auto;padding:32px 22px 36px}
     <div class="divider"></div>
   </div>
   <div class="steps">
-    <div class="card" id="s7" onclick="tog('s7',7)">
-      <div class="snum" id="n7">7</div>
+    <div class="card" id="s8" onclick="tog('s8',8)">
+      <div class="snum" id="n8">8</div>
       <div class="scontent">
         <div class="stitle">Aguardar o usuário apresentar o meio de pagamento</div>
         <div class="sdetail">Informe o valor da categoria antes de receber. Formas de pagamento aceitas:</div>
@@ -205,25 +214,25 @@ main{max-width:880px;margin:0 auto;padding:32px 22px 36px}
           <div class="pay-item"><span class="pi">🔖</span><span class="pn">Tag</span></div>
         </div>
       </div>
-      <div class="scheck" id="c7"></div>
-    </div>
-    <div class="card" id="s8" onclick="tog('s8',8)">
-      <div class="snum" id="n8">8</div>
-      <div class="scontent">
-        <div class="stitle">Receber a tarifa conforme o valor da categoria</div>
-        <div class="sdetail">Confirme o valor recebido. Se necessário, efetue o troco com cuidado e confirme o valor devolvido ao usuário antes de liberá-lo.</div>
-        <div class="tags"><span class="tag tg">Cobrança</span><span class="tag to">Verificar Troco</span></div>
-      </div>
       <div class="scheck" id="c8"></div>
     </div>
     <div class="card" id="s9" onclick="tog('s9',9)">
       <div class="snum" id="n9">9</div>
       <div class="scontent">
-        <div class="stitle">Preencher todos os campos do recibo e entregar ao usuário</div>
-        <div class="sdetail">Preencha todos os campos: data/hora, categoria, valor cobrado e canhoto de controle. Entregue recibo a <strong>todos os usuários sem exceção</strong>. Arquive o canhoto.</div>
-        <div class="tags"><span class="tag tb">Obrigatório</span><span class="tag tg">Comprovante</span><span class="tag to">Canhoto</span></div>
+        <div class="stitle">Receber a tarifa conforme o valor da categoria</div>
+        <div class="sdetail">Confirme o valor recebido. Se necessário, efetue o troco com cuidado e confirme o valor devolvido ao usuário antes de liberá-lo.</div>
+        <div class="tags"><span class="tag tg">Cobrança</span><span class="tag to">Verificar Troco</span></div>
       </div>
       <div class="scheck" id="c9"></div>
+    </div>
+    <div class="card" id="s10" onclick="tog('s10',10)">
+      <div class="snum" id="n10">10</div>
+      <div class="scontent">
+        <div class="stitle">Preencher todos os campos do recibo e entregar ao usuário</div>
+        <div class="sdetail">Preencha todos os campos: data/hora, categoria, valor cobrado e canhoto de controle. Entregue o recibo a <strong>todos os usuários</strong>, <strong style="color:#fbbf24">exceto os usuários de TAG</strong> (passagem automática). Arquive o canhoto para prestação de contas.</div>
+        <div class="tags"><span class="tag tb">Obrigatório</span><span class="tag tg">Exceto TAG</span><span class="tag to">Canhoto</span></div>
+      </div>
+      <div class="scheck" id="c10"></div>
     </div>
   </div>
   <button class="rst-btn" onclick="reset()">🔄 Reiniciar Checklist</button>
@@ -248,7 +257,7 @@ main{max-width:880px;margin:0 auto;padding:32px 22px 36px}
 </div>
 
 <script>
-const T=9;let done=new Set();const KEY='opencode_operador';
+const T=10;let done=new Set();const KEY='opencode_operador';
 function save(){localStorage.setItem(KEY,JSON.stringify([...done]));}
 function load(){localStorage.removeItem(KEY);}
 function tog(id,n){const c=document.getElementById(id);if(done.has(id)){done.delete(id);c.classList.remove('done');document.getElementById('n'+n).innerText=n;}else{done.add(id);c.classList.add('done');document.getElementById('n'+n).innerText='✓';burst(c);}save();upd(true);}
